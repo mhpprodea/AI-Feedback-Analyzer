@@ -113,9 +113,9 @@ nav{
   margin-bottom:14px;
   cursor:pointer;
   transition:all .22s ease;
-  background:linear-gradient(180deg,#fff 0%,#faf8ff 100%);
+  background:#faf7ff;
   position:relative;
-  box-shadow:var(--shadow-sm);
+  box-shadow:0 1px 2px rgba(17,24,39,.05);
 }
 .upload-zone:hover,.upload-zone.dragover{
   border-color:var(--brand);
@@ -145,8 +145,8 @@ nav{
 textarea{
   display:block;
   width:100%;
-  background:#fff;
-  border:1.5px solid #c4b5fd;
+  background:#ffffff;
+  border:2px solid #c4b5fd;
   border-radius:14px;
   color:#111827;
   font-size:13px;
@@ -167,9 +167,16 @@ textarea::placeholder{color:#9ca3af}
 
 .btn-row{display:flex;gap:10px;margin-bottom:4px}
 .btn-s,.btn-a{
+  flex:1;
+  background:linear-gradient(135deg,#4b5563,#8b5cf6);
+  color:#fff;
+  border:none;
+  padding:14px 18px;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:-.01em;
+  box-shadow:0 10px 25px rgba(139,92,246,.25);
   border-radius:12px;
-  transition:all .2s ease;
-  cursor:pointer;
 }
 .btn-s{
   background:#fff;
@@ -187,14 +194,15 @@ textarea::placeholder{color:#9ca3af}
 }
 .btn-a{
   flex:1;
-  background:linear-gradient(135deg,#374151,var(--brand));
+  background:linear-gradient(135deg,#4b5563,#8b5cf6);
   color:#fff;
   border:none;
   padding:14px 18px;
   font-size:15px;
   font-weight:900;
   letter-spacing:-.01em;
-  box-shadow:0 12px 24px rgba(139,92,246,.22);
+  box-shadow:0 10px 25px rgba(139,92,246,.25);
+  border-radius:12px;
 }
 .btn-a:hover{
   background:linear-gradient(135deg,#313b49,#9f67ff);
@@ -274,7 +282,7 @@ textarea::placeholder{color:#9ca3af}
   border-radius:16px;
   padding:20px;
   margin-bottom:16px;
-  box-shadow:var(--shadow-md);
+  box-shadow:0 8px 20px rgba(0,0,0,.05);
 }
 .card-title{
   font-size:11px;
