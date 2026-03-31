@@ -74,13 +74,13 @@ textarea::placeholder{color:#9ca3af}
 .pain-item:last-child{border:none;padding-bottom:0;margin:0;padding-left:12px}
 .pain-item.blocker{border-left:4px solid #ef4444}
 .pain-item.major{border-left:4px solid #f59e0b}
-.pain-item.minor{border-left:4px solid #10b981}
+.pain-item.minor{border-left:4px solid #60a5fa}
 
 .pain-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:5px}
 .severity{font-size:10px;font-weight:800;padding:3px 9px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:1px}
 .severity.blocker{background:#fee2e2;color:#991b1b}
 .severity.major{background:#fef3c7;color:#92400e}
-.severity.minor{background:#ecfdf5;color:#065f46}
+.severity.minor{background:#dbeafe;color:#1d4ed8}
 .pain-title{font-size:13px;font-weight:700;color:#0d2818;flex:1}
 .affected{font-size:10px;color:#6b7280;margin-bottom:5px;font-weight:600}
 .affected span{color:#065f46;font-weight:700}
@@ -105,12 +105,30 @@ textarea::placeholder{color:#9ca3af}
 .action-tag.monitor{background:#f3f4f6;color:#374151}
 .action-text{font-size:12px;color:#374151;line-height:1.5}
 .action-text strong{color:#0d2818;font-weight:700}
-.top-priority-list{display:flex;flex-direction:column;gap:10px}
-.priority-item{padding:12px 14px;border:1px solid #d1fae5;border-radius:10px;background:#f9fffb}
-.priority-rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:#065f46;color:#fff;font-size:11px;font-weight:800;margin-right:8px}
-.priority-title{font-size:13px;font-weight:800;color:#0d2818}
-.priority-meta{margin-top:4px;font-size:11px;color:#6b7280;line-height:1.5}
-.priority-meta strong{color:#065f46}
+.top-priority-card{border:2px solid #c7f9e5;background:linear-gradient(180deg,#f6fffb 0%,#ecfdf5 100%);box-shadow:0 10px 24px rgba(16,185,129,0.10)}
+.top-priority-title{font-size:13px;color:#064e3b;font-weight:900;letter-spacing:1.1px;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.top-priority-title .badge{background:#065f46;color:#fff;border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:0.6px}
+.top-priority-sub{font-size:12px;color:#065f46;line-height:1.5;margin-bottom:14px;font-weight:600}
+.top-priority-list{display:flex;flex-direction:column;gap:12px}
+.priority-item{padding:14px 14px 14px 16px;border:1px solid #d1fae5;border-left:6px solid #10b981;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(6,95,70,0.04)}
+.priority-item.blocker{border-left-color:#ef4444;background:#fff7f7}
+.priority-item.major{border-left-color:#f59e0b;background:#fffaf0}
+.priority-item.minor{border-left-color:#60a5fa;background:#f4f9ff}
+.priority-head{display:flex;align-items:flex-start;gap:10px}
+.priority-rank{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:#065f46;color:#fff;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px}
+.priority-item.blocker .priority-rank{background:#ef4444}
+.priority-item.major .priority-rank{background:#f59e0b}
+.priority-item.minor .priority-rank{background:#60a5fa}
+.priority-title{font-size:14px;font-weight:800;color:#0d2818;line-height:1.35}
+.priority-meta{margin-top:6px;font-size:11px;color:#4b5563;line-height:1.55}
+.priority-severity{display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:8px}
+.priority-severity.blocker{background:#fee2e2;color:#991b1b}
+.priority-severity.major{background:#fef3c7;color:#92400e}
+.priority-severity.minor{background:#dbeafe;color:#1d4ed8}
+.priority-reason{display:block;margin-top:8px;font-size:11px;font-weight:700}
+.priority-reason.blocker{color:#991b1b}
+.priority-reason.major{color:#92400e}
+.priority-reason.minor{color:#1d4ed8}
 .action-note{display:block;color:#6b7280;font-size:11px;margin-top:2px}
 
 .reset{display:block;width:100%;background:#fff;border:1.5px solid #d1fae5;color:#9ca3af;border-radius:8px;padding:10px;font-size:11px;cursor:pointer;margin-top:6px;font-weight:600;transition:all 0.2s}
@@ -563,11 +581,24 @@ function render(r){
   html += '</div>';
 
   if(topPriorities.length){
-    html += '<div class="card"><div class="card-title">Top Priorities</div><div class="top-priority-list">';
+    html += '<div class="card top-priority-card">';
+    html += '<div class="top-priority-title"><span class="badge">DO FIRST</span> Top Priorities</div>';
+    html += '<div class="top-priority-sub">Most urgent issues surfaced first so you can decide what needs attention before reading the full analysis.</div>';
+    html += '<div class="top-priority-list">';
     topPriorities.forEach((p, i) => {
-      html += '<div class="priority-item">';
-      html += '<div><span class="priority-rank">' + (i+1) + '</span><span class="priority-title">' + escapeHtml(p.title) + '</span></div>';
-      html += '<div class="priority-meta"><strong>' + escapeHtml(p.severity) + '</strong> • affects ' + escapeHtml(p.affected_count) + ' user' + (p.affected_count !== 1 ? 's' : '') + ' • ' + escapeHtml(p.product_area) + '</div>';
+      const sk = severityKey(p.severity);
+      const reason = sk === 'blocker'
+        ? 'Critical issue — fix immediately'
+        : sk === 'major'
+          ? 'Important friction — address soon'
+          : 'Lower priority — monitor or batch';
+      html += '<div class="priority-item ' + sk + '">';
+      html += '<div class="priority-head"><span class="priority-rank">' + (i+1) + '</span><div>';
+      html += '<div class="priority-severity ' + sk + '">' + escapeHtml(p.severity) + '</div>';
+      html += '<div class="priority-title">' + escapeHtml(p.title) + '</div>';
+      html += '<div class="priority-meta">Affects <strong>' + escapeHtml(p.affected_count) + '</strong> user' + (p.affected_count !== 1 ? 's' : '') + ' • ' + escapeHtml(p.product_area) + '</div>';
+      html += '<span class="priority-reason ' + sk + '">' + reason + '</span>';
+      html += '</div></div>';
       html += '</div>';
     });
     html += '</div></div>';
