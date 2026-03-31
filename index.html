@@ -338,20 +338,23 @@ function normalizeFeatureTitle(text){
 function normalizePainTitle(text){
   const area = detectProductArea(text);
   const t = text.toLowerCase();
+  if(/crash|crashes|freeze|frozen|stuck|hangs/.test(t)) return 'App crashes during key workflow';
+  if(/export to pdf|pdf export/.test(t)) return 'PDF export failures';
+  if(/csv import/.test(t)) return 'CSV import failures';
   if(area === 'Onboarding') return 'Onboarding friction';
   if(area === 'Performance') return 'Slow product performance';
   if(area === 'API') return /rate limit/.test(t) ? 'Aggressive API rate limits' : 'API documentation and reliability issues';
   if(area === 'Billing') return 'Billing clarity issues';
   if(area === 'Search') return 'Search usability issues';
   if(area === 'Integrations') return 'Missing integration capabilities';
-  if(/csv import/.test(t)) return 'CSV import failures';
   return 'Core product friction';
 }
 
 function detectSeverity(text, type){
   const t = text.toLowerCase();
-  if(/will not approve|fail silently|cannot|does not work|disappears|zero results|outdated|half the endpoints do not work/.test(t)) return 'Blocker';
-  if(type === 'Performance Issue' || /confusing|too long|terrible|takes forever|way too aggressive/.test(t)) return 'Major Friction';
+  if(/crash|crashes|crashing|freeze|frozen|hangs|stuck|won't open|cannot log in|can't log in|data loss|lost my data|deleted my data|security|breach|payment failed|export to pdf|pdf export|fail silently|cannot|does not work|doesn't work|disappears|zero results|half the endpoints do not work/.test(t)) return 'Blocker';
+  if(/will not approve|outdated/.test(t)) return 'Blocker';
+  if(type === 'Performance Issue' || /confusing|too long|terrible|takes forever|way too aggressive|frustrating|manual export|manually exporting|limited/.test(t)) return 'Major Friction';
   return 'Minor Friction';
 }
 
@@ -570,7 +573,10 @@ function sentimentColor(s){
 function render(r){
   const sc = sentimentColor(r.sentiment);
   const blockers = (r.pain_points || []).filter(p => severityKey(p.severity) === 'blocker').length;
-  const topPriorities = (r.pain_points || []).slice(0,3);
+  const topPriorities = (r.pain_points || [])
+    .slice()
+    .sort((a,b) => severityRank(a.severity) - severityRank(b.severity) || b.affected_count - a.affected_count)
+    .slice(0,3);
   let html = '';
 
   html += '<div class="stats">';
@@ -591,7 +597,7 @@ function render(r){
         ? 'Critical issue — fix immediately'
         : sk === 'major'
           ? 'Important friction — address soon'
-          : 'Lower priority — monitor or batch';
+          : 'Lower priority — monitor, batch, or address after blockers and major friction';
       html += '<div class="priority-item ' + sk + '">';
       html += '<div class="priority-head"><span class="priority-rank">' + (i+1) + '</span><div>';
       html += '<div class="priority-severity ' + sk + '">' + escapeHtml(p.severity) + '</div>';
