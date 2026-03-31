@@ -4,163 +4,936 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Feedback Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
+:root{
+  --bg:#f8fafc;
+  --surface:#ffffff;
+  --surface-soft:#f8fafc;
+  --text:#111827;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --line-strong:#d1d5db;
+  --brand:#8b5cf6;
+  --brand-dark:#5b21b6;
+  --brand-soft:#f5f3ff;
+  --hero-1:#232636;
+  --hero-2:#2b3145;
+  --hero-3:#3b4260;
+  --danger:#ef4444;
+  --danger-soft:#fff5f5;
+  --warning:#f59e0b;
+  --warning-soft:#fff9ef;
+  --info:#60a5fa;
+  --info-soft:#f5f9ff;
+  --shadow-sm:0 1px 2px rgba(17,24,39,.05);
+  --shadow-md:0 10px 24px rgba(17,24,39,.06);
+  --shadow-lg:0 18px 40px rgba(17,24,39,.08);
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;color:#111827}
+html{scroll-behavior:smooth}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:linear-gradient(180deg,#f8fafc 0%,#f4f7fb 100%);
+  min-height:100vh;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
 
-/* NAV */
 nav{
-  background:#fff;
-  border-bottom:1px solid #e5e7eb;
-  padding:14px 28px;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(229,231,235,.9);
+  padding:16px 28px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:20;
 }
-.nav-brand{font-weight:800;color:#111827}
+.nav-brand{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.nav-brand span{color:var(--brand)}
 .nav-tag{
-  background:#8b5cf6;
-  color:#fff;
-  padding:4px 10px;
-  border-radius:20px;
   font-size:11px;
-  font-weight:700;
-}
-
-/* HERO */
-.hero{
-  background:linear-gradient(135deg,#232636 0%,#2b3145 55%,#3b4260 100%);
   color:#fff;
-  padding:40px 28px;
+  background:linear-gradient(135deg,var(--brand-dark),var(--brand));
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:700;
+  box-shadow:var(--shadow-sm);
 }
-.hero h1{font-size:26px;font-weight:900;margin-bottom:8px;line-height:1.15}
-.hero span{color:#c4b5fd}
-.hero p{color:#d6d8e2;font-size:13px;max-width:560px;line-height:1.6}
 
-/* MAIN */
-.main{max-width:800px;margin:auto;padding:24px}
+.hero{
+  background:
+    radial-gradient(circle at top left, rgba(139,92,246,.18), transparent 28%),
+    linear-gradient(135deg,var(--hero-1) 0%,var(--hero-2) 56%,var(--hero-3) 100%);
+  padding:46px 28px 40px;
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:auto -80px -120px auto;
+  width:280px;
+  height:280px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(196,181,253,.22), transparent 62%);
+  pointer-events:none;
+}
+.hero h1{
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:-.04em;
+  line-height:1.08;
+  margin-bottom:10px;
+  max-width:760px;
+}
+.hero h1 span{color:#c4b5fd}
+.hero p{
+  font-size:13px;
+  color:#d7dbe7;
+  line-height:1.72;
+  max-width:620px;
+}
 
-/* UPLOAD */
+.main{padding:28px 28px 40px;max-width:880px;margin:0 auto}
+
 .upload-zone{
   border:2px dashed #c4b5fd;
-  padding:20px;
+  border-radius:16px;
+  padding:22px 18px;
   text-align:center;
-  border-radius:12px;
-  background:#fff;
-  margin-bottom:12px;
-  transition:all .2s ease;
+  margin-bottom:14px;
+  cursor:pointer;
+  transition:all .22s ease;
+  background:linear-gradient(180deg,#fff 0%,#faf8ff 100%);
+  position:relative;
+  box-shadow:var(--shadow-sm);
 }
-.upload-zone:hover{
-  border-color:#8b5cf6;
-  background:#faf7ff;
+.upload-zone:hover,.upload-zone.dragover{
+  border-color:var(--brand);
+  background:linear-gradient(180deg,#fff 0%,#f7f3ff 100%);
+  box-shadow:0 12px 26px rgba(139,92,246,.12);
+  transform:translateY(-1px);
 }
+.upload-zone input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.upload-icon{font-size:24px;margin-bottom:6px}
+.upload-text{font-size:14px;color:var(--text);font-weight:800}
+.upload-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.upload-filename{font-size:11px;color:var(--brand);margin-top:8px;font-weight:700;min-height:16px}
 
-/* DIVIDER */
 .divider{
-  text-align:center;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:14px 0 12px;
+  color:var(--text);
+  font-size:12px;
   font-weight:900;
-  margin:14px 0 10px;
-  color:#1f2937;
-  font-size:13px;
-  letter-spacing:.04em;
+  letter-spacing:.08em;
+  text-transform:uppercase;
 }
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
 
-/* TEXTAREA */
 textarea{
+  display:block;
   width:100%;
-  border:2px solid #e5e7eb;
-  border-radius:10px;
-  padding:12px;
-  height:120px;
-  margin-bottom:12px;
-  font:inherit;
+  background:#fff;
+  border:1.5px solid #c4b5fd;
+  border-radius:14px;
+  color:#111827;
+  font-size:13px;
+  line-height:1.7;
+  padding:14px 15px;
+  height:130px;
+  outline:none;
+  margin-bottom:14px;
   resize:vertical;
+  font-family:inherit;
+  transition:border-color .2s, box-shadow .2s;
 }
 textarea:focus{
-  outline:none;
-  border-color:#a78bfa;
-  box-shadow:0 0 0 3px rgba(167,139,250,.18);
+  border-color:#8b5cf6;
+  box-shadow:0 0 0 4px rgba(139,92,246,.15);
 }
+textarea::placeholder{color:#9ca3af}
 
-/* BUTTON */
-.btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  font-weight:800;
-  background:linear-gradient(135deg,#374151,#8b5cf6);
-  color:#fff;
-  cursor:pointer;
-  box-shadow:0 6px 18px rgba(139,92,246,.18);
-}
-.btn:hover{
-  background:linear-gradient(135deg,#313b49,#9f67ff);
-}
-
-/* CARD */
-.card{
-  background:#fff;
-  border:1px solid #e5e7eb;
+.btn-row{display:flex;gap:10px;margin-bottom:4px}
+.btn-s,.btn-a{
   border-radius:12px;
-  padding:16px;
-  margin-top:14px;
+  transition:all .2s ease;
+  cursor:pointer;
+}
+.btn-s{
+  background:#fff;
+  color:var(--brand-dark);
+  border:1.5px solid #d8ccff;
+  padding:12px 16px;
+  font-size:13px;
+  font-weight:800;
+  box-shadow:var(--shadow-sm);
+}
+.btn-s:hover{
+  background:#faf7ff;
+  border-color:var(--brand);
+  transform:translateY(-1px);
+}
+.btn-a{
+  flex:1;
+  background:linear-gradient(135deg,#374151,var(--brand));
+  color:#fff;
+  border:none;
+  padding:14px 18px;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:-.01em;
+  box-shadow:0 12px 24px rgba(139,92,246,.22);
+}
+.btn-a:hover{
+  background:linear-gradient(135deg,#313b49,#9f67ff);
+  transform:translateY(-1px);
+}
+.btn-a:disabled{
+  background:#c4b5fd;
+  box-shadow:none;
+  cursor:not-allowed;
+  transform:none;
 }
 
-/* PRIORITY COLORS */
-.blocker{border-left:4px solid #ef4444}
-.major{border-left:4px solid #f59e0b}
-.minor{border-left:4px solid #60a5fa}
-
-.small{
-  color:#6b7280;
+.error-box{
+  display:none;
+  background:#fff5f5;
+  border:1px solid #fecaca;
+  border-radius:12px;
+  padding:14px;
+  color:#991b1b;
   font-size:12px;
-  margin-top:6px;
+  margin-top:12px;
+  line-height:1.6;
+}
+.error-box.on{display:block}
+
+.loading{display:none;text-align:center;padding:34px;color:var(--muted);font-size:12px}
+.spinner{
+  width:30px;height:30px;border:2px solid #e5e7eb;border-top-color:var(--brand);
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.results{display:none}
+.results.on{display:block;margin-top:24px}
+
+.summary-box{
+  background:linear-gradient(180deg,#fff 0%,var(--brand-soft) 100%);
+  border:1px solid #ddd6fe;
+  border-left:4px solid var(--brand);
+  border-radius:14px;
+  padding:16px 18px;
+  margin-bottom:18px;
+  font-size:13px;
+  color:#312e81;
+  line-height:1.75;
+  box-shadow:var(--shadow-sm);
+}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat{
+  background:rgba(255,255,255,.9);
+  border:1px solid rgba(229,231,235,.9);
+  border-radius:16px;
+  padding:16px 14px;
+  text-align:center;
+  box-shadow:var(--shadow-sm);
+}
+.stat .val{font-size:24px;font-weight:900;margin-bottom:4px;letter-spacing:-.03em}
+.stat .lbl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+
+.breakdown{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.type-pill{
+  display:flex;align-items:center;gap:7px;
+  background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:7px 12px;
+  font-size:11px;font-weight:800;color:#374151;
+  box-shadow:var(--shadow-sm);
+}
+.type-pill .count{
+  background:linear-gradient(135deg,var(--brand-dark),var(--brand));
+  color:#fff;border-radius:999px;padding:2px 8px;font-size:10px
+}
+
+.card{
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(229,231,235,.95);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow-md);
+}
+.card-title{
+  font-size:11px;
+  color:var(--brand-dark);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  margin-bottom:16px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.card-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#ddd6fe,transparent)}
+
+.top-priority-card{
+  border:1px solid #ddd6fe;
+  background:linear-gradient(180deg,#ffffff 0%,#f7f3ff 100%);
+  box-shadow:0 18px 34px rgba(91,33,182,.08)
+}
+.top-priority-title{
+  font-size:13px;color:#312e81;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;margin-bottom:6px
+}
+.top-priority-title .badge{
+  background:linear-gradient(135deg,var(--brand-dark),var(--brand));
+  color:#fff;border-radius:999px;padding:5px 10px;font-size:10px;font-weight:800;letter-spacing:.06em
+}
+.top-priority-sub{font-size:12px;color:#4b5563;line-height:1.6;margin-bottom:14px;font-weight:600}
+.top-priority-list{display:flex;flex-direction:column;gap:12px}
+.priority-item{
+  padding:15px 15px 15px 16px;border:1px solid var(--line);border-left:6px solid var(--brand);
+  border-radius:14px;background:#fff;box-shadow:var(--shadow-sm)
+}
+.priority-item.blocker{border-left-color:var(--danger);background:var(--danger-soft)}
+.priority-item.major{border-left-color:var(--warning);background:var(--warning-soft)}
+.priority-item.minor{border-left-color:var(--info);background:var(--info-soft)}
+.priority-head{display:flex;align-items:flex-start;gap:10px}
+.priority-rank{
+  display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;
+  background:linear-gradient(135deg,var(--brand-dark),var(--brand));color:#fff;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px
+}
+.priority-item.blocker .priority-rank{background:var(--danger)}
+.priority-item.major .priority-rank{background:var(--warning)}
+.priority-item.minor .priority-rank{background:var(--info)}
+.priority-title{font-size:14px;font-weight:800;color:var(--text);line-height:1.4}
+.priority-meta{margin-top:6px;font-size:11px;color:#4b5563;line-height:1.6}
+.priority-severity{
+  display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:8px
+}
+.priority-severity.blocker{background:#fee2e2;color:#991b1b}
+.priority-severity.major{background:#fef3c7;color:#92400e}
+.priority-severity.minor{background:#dbeafe;color:#1d4ed8}
+.priority-reason{display:block;margin-top:8px;font-size:11px;font-weight:800}
+.priority-reason.blocker{color:#991b1b}
+.priority-reason.major{color:#92400e}
+.priority-reason.minor{color:#1d4ed8}
+
+.pain-item{border-bottom:1px solid #f3f4f6;padding-bottom:15px;margin-bottom:15px;padding-left:12px}
+.pain-item:last-child{border:none;padding-bottom:0;margin:0}
+.pain-item.blocker{border-left:4px solid var(--danger)}
+.pain-item.major{border-left:4px solid var(--warning)}
+.pain-item.minor{border-left:4px solid var(--info)}
+.pain-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px}
+.severity{
+  font-size:10px;font-weight:900;padding:4px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px
+}
+.severity.blocker{background:#fee2e2;color:#991b1b}
+.severity.major{background:#fef3c7;color:#92400e}
+.severity.minor{background:#dbeafe;color:#1d4ed8}
+.pain-title{font-size:14px;font-weight:800;color:var(--text);flex:1;line-height:1.4}
+.affected{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700}
+.affected span{color:var(--brand-dark);font-weight:800}
+.pain-desc{font-size:12px;color:#4b5563;line-height:1.65;margin-bottom:8px}
+.quote{
+  background:#f9fafb;border-left:3px solid #ddd6fe;border-radius:0 8px 8px 0;
+  padding:9px 11px;font-size:11px;color:#374151;font-style:italic;line-height:1.6
+}
+
+.feat-item{display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid #f3f4f6;padding-bottom:13px;margin-bottom:13px}
+.feat-item:last-child{border:none;padding:0;margin:0}
+.feat-votes{
+  display:flex;flex-direction:column;align-items:center;background:#f7f3ff;border:1px solid #ddd6fe;
+  border-radius:10px;padding:7px 10px;min-width:46px;flex-shrink:0
+}
+.feat-votes .v-num{font-size:16px;font-weight:900;color:var(--brand-dark);line-height:1}
+.feat-votes .v-lbl{font-size:9px;color:var(--muted);font-weight:700}
+.feat-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px}
+.feat-desc{font-size:12px;color:#4b5563;line-height:1.6}
+.feat-type{
+  display:inline-block;font-size:10px;padding:3px 8px;border-radius:999px;background:#f5f3ff;color:var(--brand-dark);
+  font-weight:800;margin-top:6px;border:1px solid #ddd6fe
+}
+
+.action-item{display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid #f3f4f6;padding-bottom:13px;margin-bottom:13px}
+.action-item:last-child{border:none;padding:0;margin:0}
+.action-tag{
+  font-size:10px;font-weight:900;padding:5px 10px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px;
+  letter-spacing:.04em
+}
+.action-tag.fix-now{background:#fee2e2;color:#991b1b}
+.action-tag.roadmap{background:#e0e7ff;color:#3730a3}
+.action-tag.discovery{background:#fef3c7;color:#92400e}
+.action-tag.monitor{background:#f3f4f6;color:#374151}
+.action-text{font-size:12px;color:#374151;line-height:1.65}
+.action-text strong{color:var(--text);font-weight:800}
+
+.reset{
+  display:block;width:100%;background:#fff;border:1.5px solid var(--line);color:#6b7280;border-radius:12px;padding:11px;
+  font-size:12px;cursor:pointer;margin-top:8px;font-weight:700;transition:all .2s;box-shadow:var(--shadow-sm)
+}
+.reset:hover{color:var(--brand-dark);border-color:#c4b5fd;background:#faf7ff}
+
+footer{
+  text-align:center;padding:26px;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;margin-top:18px;background:rgba(255,255,255,.85)
+}
+footer a{color:var(--brand);text-decoration:none;font-weight:700}
+
+@media (max-width:700px){
+  nav,.hero,.main{padding-left:18px;padding-right:18px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .btn-row{flex-direction:column}
+  .priority-meta{line-height:1.6}
 }
 </style>
-</head>
 
+</head>
 <body>
 
 <nav>
-  <div class="nav-brand">Feedback Intelligence</div>
-  <div class="nav-tag">AI</div>
+  <div class="nav-brand">Feedback <span>Intelligence</span></div>
+  <div class="nav-tag">AI-Powered</div>
 </nav>
 
 <div class="hero">
-  <h1>Turn Feedback into <span>Product Decisions</span></h1>
-  <p>Analyze messy feedback and get clear priorities, stronger decision support, and faster next steps.</p>
+  <h1>Turn Raw Customer Feedback into<br><span>Clear Product Decisions</span></h1>
+  <p>Upload or paste feedback from any source. Get a structured PM-ready analysis — pain points by severity, feature requests ranked by demand, and a prioritized action plan.</p>
 </div>
 
 <div class="main">
 
-<div class="upload-zone">
-Drop file or paste below
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept=".txt,.csv,.pdf,.docx,.png,.jpg,.jpeg,.webp,.gif" onchange="handleFile(event)">
+    <div class="upload-icon">📂</div>
+    <div class="upload-text">Drop a file or click to upload</div>
+    <div class="upload-sub">TXT · CSV · PDF · DOCX · PNG · JPG · Screenshots</div>
+    <div class="upload-filename" id="fileName"></div>
+  </div>
+
+  <div class="divider">OR PASTE YOUR FEEDBACK HERE</div>
+
+  <textarea id="inp" placeholder="Paste support tickets, NPS comments, app store reviews, or user interview notes here.
+
+Example:
+1. Onboarding is confusing, took hours to set up.
+2. API docs are outdated.
+3. Dashboard loads slow with 500+ records.
+4. Please add Slack notifications."></textarea>
+
+  <div class="btn-row">
+    <button class="btn-a" id="analyzeBtn" onclick="analyze()">⚡ Analyze Feedback</button>
+  </div>
+
+  <div class="error-box" id="errBox"></div>
+  <div class="loading" id="loading"><div class="spinner"></div>Analyzing feedback...</div>
+  <div class="results" id="results"></div>
+
 </div>
 
-<div class="divider">OR PASTE YOUR FEEDBACK HERE</div>
+<footer>
+  Feedback Intelligence · PM Portfolio 2026 · <a href="https://mhpprodea.github.io/hysa-optimizer/" target="_blank">See also: HYSA Optimizer →</a>
+</footer>
 
-<textarea placeholder="Paste feedback..."></textarea>
+<script>
 
-<button class="btn">Analyze Feedback</button>
+try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}catch(e){}
 
-<div class="card blocker">
-<strong>Critical:</strong> App crashes on export
-<div class="small">Core workflow failure. Fix immediately.</div>
-</div>
 
-<div class="card major">
-<strong>Major:</strong> Dashboard slow
-<div class="small">High-friction issue. Address soon.</div>
-</div>
+let pendingImageData = null;
+let pendingImageType = null;
 
-<div class="card minor">
-<strong>Minor:</strong> UI spacing issue
-<div class="small">Lower urgency. Monitor or batch.</div>
-</div>
 
-</div>
+async function handleFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
 
+  const fn = document.getElementById('fileName');
+  fn.textContent = 'Reading ' + file.name + '...';
+  pendingImageData = null;
+  pendingImageType = null;
+  document.getElementById('inp').value = '';
+
+  try{
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if(ext === 'txt' || ext === 'csv'){
+      document.getElementById('inp').value = await file.text();
+      fn.textContent = '✓ ' + file.name;
+      return;
+    }
+
+    if(ext === 'pdf'){
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+      let text = '';
+
+      for(let i = 1; i <= pdf.numPages; i++){
+        const page = await pdf.getPage(i);
+        const tc = await page.getTextContent();
+        text += tc.items.map(x => x.str).join(' ') + '\n';
+      }
+
+      const extracted = text.trim();
+      if(extracted){
+        document.getElementById('inp').value = extracted;
+        fn.textContent = '✓ ' + file.name;
+      }else{
+        fn.textContent = 'No extractable text found in this PDF.';
+      }
+      return;
+    }
+
+    if(ext === 'docx'){
+      const ab = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({arrayBuffer:ab});
+      document.getElementById('inp').value = result.value.trim();
+      fn.textContent = '✓ ' + file.name;
+      return;
+    }
+
+    if(['png','jpg','jpeg','webp','gif'].includes(ext)){
+      fn.textContent = 'Image uploaded. Paste the feedback text to analyze it.';
+      return;
+    }
+
+    fn.textContent = 'Unsupported file type. Use TXT, CSV, PDF, or DOCX.';
+  }catch(err){
+    fn.textContent = 'Error reading file: ' + err.message;
+  }
+}
+
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if(file) handleFile({target:{files:[file]}});
+});
+
+function showErr(msg){
+  const el = document.getElementById('errBox');
+  el.textContent = msg;
+  el.className = 'error-box on';
+}
+
+function hideErr(){
+  document.getElementById('errBox').className = 'error-box';
+}
+
+function escapeHtml(str){
+  return String(str ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function splitFeedback(text){
+  const normalized = text.replace(/\r/g, '').trim();
+  if(!normalized) return [];
+
+  const lines = normalized
+    .split(/\n+/)
+    .map(x => x.trim())
+    .filter(Boolean)
+    .map(x => x.replace(/^[-*•]\s*/, '').replace(/^\d+[.)]\s*/, '').trim())
+    .filter(Boolean);
+
+  if(lines.length > 1) return lines;
+
+  return normalized
+    .split(/(?<=[.!?])\s+(?=[A-Z0-9])/)
+    .map(x => x.trim())
+    .filter(Boolean);
+}
+
+function detectProductArea(text){
+  const t = text.toLowerCase();
+  if(/onboarding|setup|wizard|checklist/.test(t)) return 'Onboarding';
+  if(/api|endpoint|rate limit|sdk|documentation/.test(t)) return 'API';
+  if(/integration|salesforce|slack|sso|saml/.test(t)) return 'Integrations';
+  if(/slow|performance|load|lag|filters take|seconds/.test(t)) return 'Performance';
+  if(/billing|charge|pricing|invoice|plan/.test(t)) return 'Billing';
+  if(/search/.test(t)) return 'Search';
+  if(/navigation|menu/.test(t)) return 'Navigation';
+  return 'Core Feature';
+}
+
+function detectType(text){
+  const t = text.toLowerCase();
+  if(/would love|please add|we need|need .*support|feature request|integration|mobile app|sso|saml|notifications|customization|rearrange widgets|schedule automated/.test(t)) return 'Feature Request';
+  if(/slow|performance|load|takes forever|10-15 seconds|lag/.test(t)) return 'Performance Issue';
+  if(/confusing|hard to|cannot tell|mistype|ux|flow|discover|disappears/.test(t)) return 'UX Friction';
+  if(/support|help desk|response/.test(t)) return 'Support Experience';
+  if(/pricing|billing|charge|expensive|cost|value/.test(t)) return 'Pricing & Value';
+  return 'Bug Report';
+}
+
+function normalizeFeatureTitle(text){
+  const t = text.toLowerCase();
+  if(/salesforce/.test(t)) return 'Salesforce integration';
+  if(/slack/.test(t)) return 'Slack notifications';
+  if(/sso|saml/.test(t)) return 'SSO / SAML support';
+  if(/mobile app/.test(t)) return 'Mobile app';
+  if(/guided setup|wizard/.test(t)) return 'Guided setup wizard';
+  if(/automated exports|schedule.*export/.test(t)) return 'Scheduled exports';
+  if(/customization|rearrange widgets/.test(t)) return 'Dashboard customization';
+  return text.replace(/^please add\s+/i,'').replace(/^would love to see\s+/i,'').replace(/^we need\s+/i,'').replace(/^needs?\s+/i,'').replace(/[.].*$/,'').trim() || 'Requested feature';
+}
+
+function normalizePainTitle(text){
+  const area = detectProductArea(text);
+  const t = text.toLowerCase();
+  if(/crash|crashes|freeze|frozen|stuck|hangs/.test(t)) return 'App crashes during key workflow';
+  if(/export to pdf|pdf export/.test(t)) return 'PDF export failures';
+  if(/csv import/.test(t)) return 'CSV import failures';
+  if(area === 'Onboarding') return 'Onboarding friction';
+  if(area === 'Performance') return 'Slow product performance';
+  if(area === 'API') return /rate limit/.test(t) ? 'Aggressive API rate limits' : 'API documentation and reliability issues';
+  if(area === 'Billing') return 'Billing clarity issues';
+  if(area === 'Search') return 'Search usability issues';
+  if(area === 'Integrations') return 'Missing integration capabilities';
+  return 'Core product friction';
+}
+
+function detectSeverity(text, type){
+  const t = text.toLowerCase();
+  if(/crash|crashes|crashing|freeze|frozen|hangs|stuck|won't open|cannot log in|can't log in|data loss|lost my data|deleted my data|security|breach|payment failed|export to pdf|pdf export|fail silently|cannot|does not work|doesn't work|disappears|zero results|half the endpoints do not work/.test(t)) return 'Blocker';
+  if(/will not approve|outdated/.test(t)) return 'Blocker';
+  if(type === 'Performance Issue' || /confusing|too long|terrible|takes forever|way too aggressive|frustrating|manual export|manually exporting|limited/.test(t)) return 'Major Friction';
+  return 'Minor Friction';
+}
+
+function featureType(text){
+  const t = text.toLowerCase();
+  if(/salesforce|slack|sso|saml|integration/.test(t)) return 'Integration';
+  if(/wizard|customization|exports|mobile app/.test(t)) return 'Core Feature';
+  return 'UX Improvement';
+}
+
+function buildAnalysis(items){
+  const cleanItems = items.map(x => x.trim()).filter(Boolean);
+  if(!cleanItems.length) return {no_feedback:true};
+
+  const typeCounts = new Map();
+  const painGroups = new Map();
+  const featureGroups = new Map();
+  let negative = 0;
+  let positive = 0;
+
+  cleanItems.forEach(item => {
+    const type = detectType(item);
+    typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
+
+    const lower = item.toLowerCase();
+    if(/great|love|good|helpful/.test(lower)) positive += 1;
+    if(/confusing|outdated|terrible|slow|cannot|fail|issue|problem|aggressive|zero results/.test(lower)) negative += 1;
+
+    const painTitle = normalizePainTitle(item);
+    const severity = detectSeverity(item, type);
+    const area = detectProductArea(item);
+
+    if(type !== 'Feature Request' || /cannot|manual|limited|needs a guided/.test(lower)){
+      const key = painTitle + '|' + area;
+      if(!painGroups.has(key)){
+        painGroups.set(key, {
+          title: painTitle,
+          severity,
+          affected_count: 0,
+          product_area: area,
+          description: '',
+          representative_quote: item,
+          examples: []
+        });
+      }
+      const entry = painGroups.get(key);
+      entry.affected_count += 1;
+      entry.examples.push(item);
+      if(severity === 'Blocker') entry.severity = 'Blocker';
+      else if(severity === 'Major Friction' && entry.severity !== 'Blocker') entry.severity = 'Major Friction';
+    }
+
+    if(type === 'Feature Request'){
+      const title = normalizeFeatureTitle(item);
+      const fKey = title.toLowerCase();
+      if(!featureGroups.has(fKey)){
+        featureGroups.set(fKey, {
+          title,
+          demand_count: 0,
+          description: '',
+          type: featureType(item),
+          examples: []
+        });
+      }
+      const feature = featureGroups.get(fKey);
+      feature.demand_count += 1;
+      feature.examples.push(item);
+    }
+  });
+
+  const painPoints = Array.from(painGroups.values()).map(p => {
+    p.description = summarizeExamples(p.examples, p.product_area);
+    return p;
+  }).sort((a,b) => severityRank(a.severity) - severityRank(b.severity) || b.affected_count - a.affected_count).slice(0,5);
+
+  const featureRequests = Array.from(featureGroups.values()).map(f => {
+    f.description = summarizeFeature(f.examples, f.title);
+    return f;
+  }).sort((a,b) => b.demand_count - a.demand_count || a.title.localeCompare(b.title)).slice(0,4);
+
+  const typeBreakdown = Array.from(typeCounts.entries())
+    .map(([type,count]) => ({type,count}))
+    .sort((a,b) => b.count - a.count);
+
+  let sentiment = 'Mixed';
+  if(negative > positive + 1) sentiment = 'Mostly Negative';
+  else if(positive > negative) sentiment = 'Mostly Positive';
+
+  const topPain = painPoints[0]?.title || 'customer friction';
+  const topFeature = featureRequests[0]?.title || 'additional capabilities';
+  const executiveSummary = `The feedback points to repeated friction around ${topPain.toLowerCase()}, with ${painPoints.filter(p => p.severity === 'Blocker').length} blocker-level issue${painPoints.filter(p => p.severity === 'Blocker').length === 1 ? '' : 's'} showing up in the analysis. Customers are also asking for ${topFeature.toLowerCase()} and similar improvements, which suggests clear roadmap demand beyond the immediate fixes.`;
+
+  const actionPlan = buildActionPlan(painPoints, featureRequests);
+
+  return {
+    no_feedback:false,
+    total_items: cleanItems.length,
+    sentiment,
+    executive_summary: executiveSummary,
+    type_breakdown: typeBreakdown,
+    pain_points: painPoints,
+    feature_requests: featureRequests,
+    action_plan: actionPlan
+  };
+}
+
+function severityRank(severity){
+  if(severity === 'Blocker') return 0;
+  if(severity === 'Major Friction') return 1;
+  return 2;
+}
+
+function summarizeExamples(examples, area){
+  const count = examples.length;
+  const first = examples[0].replace(/[.\s]+$/,'');
+  if(count === 1) return `${first}. This issue impacts the ${area.toLowerCase()} experience and likely creates avoidable friction.`;
+  return `${count} separate comments point to the same issue. The repeated pattern suggests this is not isolated and is affecting the ${area.toLowerCase()} experience.`;
+}
+
+function summarizeFeature(examples, title){
+  if(examples.length === 1) return `${title} came up as a direct request from customer feedback.`;
+  return `${title} appeared multiple times, which suggests real demand instead of a one-off ask.`;
+}
+
+function buildActionPlan(painPoints, featureRequests){
+  const actions = [];
+
+  painPoints.forEach(p => {
+    let action = 'Monitor';
+    if(p.severity === 'Blocker') action = 'Fix Now';
+    else if(p.severity === 'Major Friction') action = 'Needs Discovery';
+
+    actions.push({
+      action,
+      item: p.title,
+      rationale: p.severity === 'Blocker'
+        ? 'This issue is directly blocking successful product usage and should be addressed before lower-priority work.'
+        : 'This issue shows repeated friction and needs validation of root cause, scope, and fastest path to improvement.'
+    });
+  });
+
+  featureRequests.slice(0,2).forEach(f => {
+    actions.push({
+      action: 'Add to Roadmap',
+      item: f.title,
+      rationale: 'This request appeared with enough demand to justify roadmap consideration after immediate friction is addressed.'
+    });
+  });
+
+  const deduped = [];
+  const seen = new Set();
+  actions.forEach(a => {
+    const key = a.item.toLowerCase();
+    if(!seen.has(key) && deduped.length < 5){
+      seen.add(key);
+      deduped.push(a);
+    }
+  });
+  return deduped;
+}
+
+async function analyze(){
+  const inp = document.getElementById('inp').value.trim();
+  if(!inp){
+    showErr('Please paste feedback or upload a text-based file.');
+    return;
+  }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('results').className = 'results';
+  hideErr();
+
+  try{
+    const items = splitFeedback(inp);
+    const result = buildAnalysis(items);
+    if(result.no_feedback){
+      showErr('No customer feedback detected. Please paste support tickets, reviews, NPS comments, or interview notes.');
+      return;
+    }
+    render(result);
+  }catch(e){
+    showErr('Could not analyze the feedback: ' + e.message);
+  }finally{
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function severityKey(s){
+  if(!s) return 'minor';
+  const l = s.toLowerCase();
+  if(l.includes('blocker')) return 'blocker';
+  if(l.includes('major')) return 'major';
+  return 'minor';
+}
+
+function actionClass(a){
+  if(!a) return 'monitor';
+  const l = a.toLowerCase();
+  if(l.includes('fix')) return 'fix-now';
+  if(l.includes('roadmap')) return 'roadmap';
+  if(l.includes('discovery')) return 'discovery';
+  return 'monitor';
+}
+
+function sentimentColor(s){
+  if(!s) return '#f59e0b';
+  const l = s.toLowerCase();
+  if(l.includes('negative')) return '#ef4444';
+  if(l.includes('positive')) return '#10b981';
+  return '#f59e0b';
+}
+
+function render(r){
+  const sc = sentimentColor(r.sentiment);
+  const blockers = (r.pain_points || []).filter(p => severityKey(p.severity) === 'blocker').length;
+  const topPriorities = (r.pain_points || [])
+    .slice()
+    .sort((a,b) => severityRank(a.severity) - severityRank(b.severity) || b.affected_count - a.affected_count)
+    .slice(0,3);
+  let html = '';
+
+  html += '<div class="stats">';
+  html += '<div class="stat"><div class="val" style="color:#5b21b6">' + escapeHtml(r.total_items) + '</div><div class="lbl">Feedback Items</div></div>';
+  html += '<div class="stat"><div class="val" style="color:#ef4444">' + blockers + '</div><div class="lbl">Blockers</div></div>';
+  html += '<div class="stat"><div class="val" style="color:#5b21b6">' + ((r.feature_requests || []).length) + '</div><div class="lbl">Feature Requests</div></div>';
+  html += '<div class="stat"><div class="val" style="color:' + sc + ';font-size:13px;padding-top:6px">' + escapeHtml(r.sentiment) + '</div><div class="lbl">Sentiment</div></div>';
+  html += '</div>';
+
+  if(topPriorities.length){
+    html += '<div class="card top-priority-card">';
+    html += '<div class="top-priority-title"><span class="badge">DO FIRST</span> Top Priorities</div>';
+    html += '<div class="top-priority-sub">Most urgent issues surfaced first so you can decide what needs attention before reading the full analysis.</div>';
+    html += '<div class="top-priority-list">';
+    topPriorities.forEach((p, i) => {
+      const sk = severityKey(p.severity);
+      const reason = sk === 'blocker'
+        ? 'Critical issue — fix immediately'
+        : sk === 'major'
+          ? 'Important friction — address soon'
+          : 'Lower priority — monitor, batch, or address after blockers and major friction';
+      html += '<div class="priority-item ' + sk + '">';
+      html += '<div class="priority-head"><span class="priority-rank">' + (i+1) + '</span><div>';
+      html += '<div class="priority-severity ' + sk + '">' + escapeHtml(p.severity) + '</div>';
+      html += '<div class="priority-title">' + escapeHtml(p.title) + '</div>';
+      html += '<div class="priority-meta">Affects <strong>' + escapeHtml(p.affected_count) + '</strong> user' + (p.affected_count !== 1 ? 's' : '') + ' • ' + escapeHtml(p.product_area) + '</div>';
+      html += '<span class="priority-reason ' + sk + '">' + reason + '</span>';
+      html += '</div></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  if(r.action_plan && r.action_plan.length){
+    html += '<div class="card"><div class="card-title">Action Plan</div>';
+    r.action_plan.forEach(a => {
+      html += '<div class="action-item"><span class="action-tag ' + actionClass(a.action) + '">' + escapeHtml(a.action) + '</span>';
+      html += '<div class="action-text"><strong>' + escapeHtml(a.item) + '</strong><span class="action-note">' + escapeHtml(a.rationale) + '</span></div></div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="summary-box">' + escapeHtml(r.executive_summary) + '</div>';
+
+  if(r.type_breakdown && r.type_breakdown.length){
+    html += '<div class="breakdown">';
+    r.type_breakdown.forEach(t => {
+      html += '<div class="type-pill">' + escapeHtml(t.type) + ' <span class="count">' + escapeHtml(t.count) + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  if(r.pain_points && r.pain_points.length){
+    html += '<div class="card"><div class="card-title">Pain Points</div>';
+    r.pain_points.forEach(p => {
+      const sk = severityKey(p.severity);
+      html += '<div class="pain-item ' + sk + '">';
+      html += '<div class="pain-top"><span class="severity ' + sk + '">' + escapeHtml(p.severity) + '</span><div class="pain-title">' + escapeHtml(p.title) + '</div></div>';
+      html += '<div class="affected"><span>' + escapeHtml(p.affected_count) + ' user' + (p.affected_count !== 1 ? 's' : '') + '</span> - ' + escapeHtml(p.product_area) + '</div>';
+      html += '<div class="pain-desc">' + escapeHtml(p.description) + '</div>';
+      if(p.representative_quote){
+        html += '<div class="quote">&quot;' + escapeHtml(p.representative_quote) + '&quot;</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if(r.feature_requests && r.feature_requests.length){
+    html += '<div class="card"><div class="card-title">Feature Requests</div>';
+    r.feature_requests.forEach(f => {
+      html += '<div class="feat-item">';
+      html += '<div class="feat-votes"><div class="v-num">' + escapeHtml(f.demand_count) + '</div><div class="v-lbl">asks</div></div>';
+      html += '<div><div class="feat-title">' + escapeHtml(f.title) + '</div><div class="feat-desc">' + escapeHtml(f.description) + '</div><span class="feat-type">' + escapeHtml(f.type) + '</span></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<button class="reset" onclick="resetApp()">Back</button>';
+  document.getElementById('results').innerHTML = html;
+  document.getElementById('results').className = 'results on';
+}
+
+function resetApp(){
+  document.getElementById('results').className = 'results';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('inp').value = '';
+  document.getElementById('fileName').textContent = '';
+  document.getElementById('fileInput').value = '';
+  pendingImageData = null;
+  pendingImageType = null;
+  hideErr();
+}
+</script>
 </body>
 </html>
