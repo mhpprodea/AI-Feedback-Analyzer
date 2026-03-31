@@ -30,10 +30,10 @@ nav{background:#fff;border-bottom:1px solid #d1fae5;padding:14px 28px;display:fl
 .upload-sub{font-size:10px;color:#6b7280;margin-top:2px}
 .upload-filename{font-size:11px;color:#10b981;margin-top:5px;font-weight:700;min-height:16px}
 
-.divider{display:flex;align-items:center;gap:10px;margin-bottom:10px;color:#a7f3d0;font-size:11px;font-weight:600}
+.divider{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:#065f46;font-size:13px;font-weight:900;letter-spacing:0.4px;text-transform:uppercase}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:#d1fae5}
 
-textarea{display:block;width:100%;background:#fff;border:1.5px solid #d1fae5;border-radius:10px;color:#0d2818;font-size:12px;line-height:1.6;padding:12px;height:110px;outline:none;margin-bottom:12px;resize:none;font-family:system-ui,sans-serif;transition:border-color 0.2s}
+textarea{display:block;width:100%;background:#fff;border:2px solid #10b981;border-radius:10px;color:#0d2818;font-size:12px;line-height:1.6;padding:12px;height:110px;outline:none;margin-bottom:12px;resize:none;font-family:system-ui,sans-serif;transition:border-color 0.2s, box-shadow 0.2s}
 textarea:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,0.1)}
 textarea::placeholder{color:#9ca3af}
 
@@ -105,12 +105,20 @@ textarea::placeholder{color:#9ca3af}
 .action-tag.monitor{background:#f3f4f6;color:#374151}
 .action-text{font-size:12px;color:#374151;line-height:1.5}
 .action-text strong{color:#0d2818;font-weight:700}
+.top-priority-list{display:flex;flex-direction:column;gap:10px}
+.priority-item{padding:12px 14px;border:1px solid #d1fae5;border-radius:10px;background:#f9fffb}
+.priority-rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:#065f46;color:#fff;font-size:11px;font-weight:800;margin-right:8px}
+.priority-title{font-size:13px;font-weight:800;color:#0d2818}
+.priority-meta{margin-top:4px;font-size:11px;color:#6b7280;line-height:1.5}
+.priority-meta strong{color:#065f46}
+.action-note{display:block;color:#6b7280;font-size:11px;margin-top:2px}
 
 .reset{display:block;width:100%;background:#fff;border:1.5px solid #d1fae5;color:#9ca3af;border-radius:8px;padding:10px;font-size:11px;cursor:pointer;margin-top:6px;font-weight:600;transition:all 0.2s}
 .reset:hover{color:#065f46;border-color:#6ee7b7}
 
 footer{text-align:center;padding:24px;font-size:11px;color:#9ca3af;border-top:1px solid #d1fae5;margin-top:16px;background:#fff}
 footer a{color:#10b981;text-decoration:none;font-weight:600}
+@media (max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.priority-meta{line-height:1.6}}
 </style>
 </head>
 <body>
@@ -135,7 +143,7 @@ footer a{color:#10b981;text-decoration:none;font-weight:600}
     <div class="upload-filename" id="fileName"></div>
   </div>
 
-  <div class="divider">or paste directly</div>
+  <div class="divider">OR PASTE YOUR FEEDBACK HERE</div>
 
   <textarea id="inp" placeholder="Paste support tickets, NPS comments, app store reviews, or user interview notes here.
 
@@ -146,7 +154,6 @@ Example:
 4. Please add Slack notifications."></textarea>
 
   <div class="btn-row">
-    <button class="btn-s" onclick="loadSample()">📋 Load Sample</button>
     <button class="btn-a" id="analyzeBtn" onclick="analyze()">⚡ Analyze Feedback</button>
   </div>
 
@@ -164,34 +171,10 @@ Example:
 
 try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}catch(e){}
 
-const SAMPLE=[
-  '1. The onboarding flow is super confusing. Took me almost a day to get set up.',
-  '2. API documentation is outdated. Half the endpoints do not work as described.',
-  '3. Dashboard takes forever to load when we have more than 200 records.',
-  '4. Would love to see a Salesforce integration. We are manually exporting CSVs every week.',
-  '5. The reporting module is great but I cannot schedule automated exports.',
-  '6. Onboarding checklist disappears after step 2 and never comes back.',
-  '7. Performance is terrible on the analytics page. Filters take 10-15 seconds.',
-  '8. We need SSO / SAML support. Our IT team will not approve tools without it.',
-  '9. The API rate limits are way too aggressive during normal usage.',
-  '10. Billing page is confusing. I cannot tell what I am being charged for.',
-  '11. Search returns zero results when I mistype anything.',
-  '12. Would really love a mobile app, the web app does not work well on phones.',
-  '13. Onboarding took too long. Needs a guided setup wizard.',
-  '14. CSV imports fail silently. No error message at all.',
-  '15. Dashboard customization is very limited. Cannot rearrange widgets.'
-].join('\n');
 
 let pendingImageData = null;
 let pendingImageType = null;
 
-function loadSample(){
-  document.getElementById('inp').value = SAMPLE;
-  document.getElementById('fileName').textContent = '';
-  pendingImageData = null;
-  pendingImageType = null;
-  hideErr();
-}
 
 async function handleFile(e){
   const file = e.target.files[0];
@@ -515,7 +498,7 @@ function buildActionPlan(painPoints, featureRequests){
 async function analyze(){
   const inp = document.getElementById('inp').value.trim();
   if(!inp){
-    showErr('Please paste feedback, upload a file, or load the sample.');
+    showErr('Please paste feedback or upload a text-based file.');
     return;
   }
 
@@ -569,6 +552,7 @@ function sentimentColor(s){
 function render(r){
   const sc = sentimentColor(r.sentiment);
   const blockers = (r.pain_points || []).filter(p => severityKey(p.severity) === 'blocker').length;
+  const topPriorities = (r.pain_points || []).slice(0,3);
   let html = '';
 
   html += '<div class="stats">';
@@ -577,6 +561,26 @@ function render(r){
   html += '<div class="stat"><div class="val" style="color:#065f46">' + ((r.feature_requests || []).length) + '</div><div class="lbl">Feature Requests</div></div>';
   html += '<div class="stat"><div class="val" style="color:' + sc + ';font-size:13px;padding-top:6px">' + escapeHtml(r.sentiment) + '</div><div class="lbl">Sentiment</div></div>';
   html += '</div>';
+
+  if(topPriorities.length){
+    html += '<div class="card"><div class="card-title">Top Priorities</div><div class="top-priority-list">';
+    topPriorities.forEach((p, i) => {
+      html += '<div class="priority-item">';
+      html += '<div><span class="priority-rank">' + (i+1) + '</span><span class="priority-title">' + escapeHtml(p.title) + '</span></div>';
+      html += '<div class="priority-meta"><strong>' + escapeHtml(p.severity) + '</strong> • affects ' + escapeHtml(p.affected_count) + ' user' + (p.affected_count !== 1 ? 's' : '') + ' • ' + escapeHtml(p.product_area) + '</div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  if(r.action_plan && r.action_plan.length){
+    html += '<div class="card"><div class="card-title">Action Plan</div>';
+    r.action_plan.forEach(a => {
+      html += '<div class="action-item"><span class="action-tag ' + actionClass(a.action) + '">' + escapeHtml(a.action) + '</span>';
+      html += '<div class="action-text"><strong>' + escapeHtml(a.item) + '</strong><span class="action-note">' + escapeHtml(a.rationale) + '</span></div></div>';
+    });
+    html += '</div>';
+  }
 
   html += '<div class="summary-box">' + escapeHtml(r.executive_summary) + '</div>';
 
@@ -611,15 +615,6 @@ function render(r){
       html += '<div class="feat-votes"><div class="v-num">' + escapeHtml(f.demand_count) + '</div><div class="v-lbl">asks</div></div>';
       html += '<div><div class="feat-title">' + escapeHtml(f.title) + '</div><div class="feat-desc">' + escapeHtml(f.description) + '</div><span class="feat-type">' + escapeHtml(f.type) + '</span></div>';
       html += '</div>';
-    });
-    html += '</div>';
-  }
-
-  if(r.action_plan && r.action_plan.length){
-    html += '<div class="card"><div class="card-title">Action Plan</div>';
-    r.action_plan.forEach(a => {
-      html += '<div class="action-item"><span class="action-tag ' + actionClass(a.action) + '">' + escapeHtml(a.action) + '</span>';
-      html += '<div class="action-text"><strong>' + escapeHtml(a.item) + '</strong><br>' + escapeHtml(a.rationale) + '</div></div>';
     });
     html += '</div>';
   }
